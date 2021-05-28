@@ -139,78 +139,10 @@ def main():
         'config_name': predictor.endpoint_name # is the same as the endpoint
     }
     outputs['model_info'].update({"name": sk_model.name})
-    # outputs['model'] = {'model_package_arn': model_package_arn}
-    # description = sm_client.describe_model_package(
-    #     ModelPackageName=model_package_arn)
-    # _l.debug(f"Model package info: {pprint.pformat(description)}")
-
-    # register the model in sagemaker model registry
-    # ahora = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-    # model_name = f'sts-model-{ahora}'
-    # outputs['model'].update(name=model_name)
-    # _l.info(f"Model name : {model_name}")
-    # primary_container = {
-    #     'ModelPackageName': model_package_arn,
-    # }
-    # response = sm_client.create_model(
-    #     ModelName=model_name,
-    #     ExecutionRoleArn=ROLE_ARN,
-    #     PrimaryContainer=primary_container
-    # )
-    # _l.debug(f"Create model response: {response}")
-    # _l.info(f"Model ARN: {response.get('ModelArn')}")
-    # -- END register model
-
-    ######  with the model registered we can deploy the endpoint #####
-
-    # Set some paths and vars needed
-
-    # Create an endpoint configuration by calling create_endpoint_config.
-    # The endpoint configuration specifies the number and type of Amazon EC2
-    # instances to use for the endpoint. It can also contain the
-    # DataCaptureConfig
-
-    # endpoint_config_name = f'sts-model-EndpointConfig-{ahora}'
-    # outputs['endpoint'] = {'config_name': endpoint_config_name}
-    # sm_session.create_endpoint_config(
-    #     name=endpoint_config_name,
-    #     model_name=model_name,
-    #     initial_instance_count=1,
-    #     instance_type='ml.m5.xlarge',
-    # )
-
-    # Create the endpoint using the EndPointConfig
-    
-    # endpoint_name = f'sts-model-Endpoint-{ahora}'
-    # outputs['endpoint'].update(name=endpoint_name)
-    # _l.info(f"Endpoint name: {endpoint_name}")
-
-    # sm_session.create_endpoint(
-    #     endpoint_name,
-    #     endpoint_config_name,
-    #     wait=True
-    # )
-
-    # _l.info(f"Endpoint {endpoint_name} ready")
-    # ENDPOINT deploy done
 
     # save outputs to a file
     with open('deploymodel_out.json', 'w') as f:
         json.dump(outputs, f, default=json_default)
-    # --
-
 
 if __name__ == '__main__':
-    # parser = argparse.ArgumentParser()
-    # parser.add_argument(
-    #     "--trainmodel-output", type=str, required=False, 
-    #     default='trainmodel_out.json',
-    #     help="JSON output from the train script"
-    # )
-
-    # args, _ = parser.parse_known_args()
-    # _l.info(f"Using training info {args.trainmodel_output}")
-    # with open(args.trainmodel_output) as f:
-    #     data = json.load(f)
-    # main(data)
     main()

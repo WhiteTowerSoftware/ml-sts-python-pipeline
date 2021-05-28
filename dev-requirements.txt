@@ -4,5 +4,7 @@ fsspec
 numpy
 pandas
 sagemaker
+python-dotenv==0.17.1
+
 # for testendpoint.py
 progressbar2
