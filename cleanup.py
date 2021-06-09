@@ -44,7 +44,7 @@ def delete_schedule(name, client):
 def main(resources):
 
     AWS_DEFAULT_REGION = os.getenv('AWS_DEFAULT_REGION', 'eu-west-1')
-    AWS_PROFILE = os.getenv('AWS_PROFILE', 'default')
+    AWS_PROFILE = os.getenv('AWS_PROFILE', None)
     AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID', None)
     AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY', None)
     b3_session, sm_client, sm_runtime, sm_session = get_sm_session(
@@ -59,6 +59,12 @@ def main(resources):
         print("Removing Model Quality Schedule")
         delete_schedule(
             resources['monitor']['schedule_name'],
+            sm_client)
+
+    if 'monitor' in resources and 'dq_schedule_name' in resources['monitor']:
+        print("Removing Data Quality Schedule")
+        delete_schedule(
+            resources['monitor']['dq_schedule_name'],
             sm_client)
 
     if 'endpoint' in resources:

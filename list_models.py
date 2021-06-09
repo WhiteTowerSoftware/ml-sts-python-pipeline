@@ -17,7 +17,7 @@ load_dotenv()
 
 def main():
     AWS_DEFAULT_REGION = os.getenv('AWS_DEFAULT_REGION', 'eu-west-1')
-    AWS_PROFILE = os.getenv('AWS_PROFILE', 'default')
+    AWS_PROFILE = os.getenv('AWS_PROFILE', None)
     AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID', None)
     AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY', None)
     _, sm_client, _, _ = get_sm_session(
