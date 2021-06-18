@@ -5,6 +5,7 @@ from sts.utils import get_sm_session
 from sagemaker.deserializers import CSVDeserializer
 from sagemaker.serializers import JSONSerializer
 from sagemaker.sklearn.model import SKLearnPredictor
+from sagemaker.s3 import S3Downloader
 from io import StringIO
 from dotenv import load_dotenv
 import random
@@ -46,17 +47,17 @@ def main(deploy_data, train_data):
     )
 
     # read test data from online
-    # test_data = csv.reader(
-    #     StringIO(S3Downloader.read_file(test_data_s3_uri)),
-    #     delimiter='\t'
-    # )
+    test_data = csv.reader(
+        StringIO(S3Downloader.read_file(test_data_s3_uri)),
+        delimiter='\t'
+    )
 
     # read test data locally,to avoid downloading from intenet, uncomment
     # when necessary, comment before submit and uncomment the previus block.
-    test_data = csv.reader(
-        StringIO(pathlib.Path('stsmsrpc.txt').read_text()),
-        delimiter='\t'
-    )
+    # test_data = csv.reader(
+    #     StringIO(pathlib.Path('stsmsrpc.txt').read_text()),
+    #     delimiter='\t'
+    # )
 
     # skip first (header) row
     next(test_data)
