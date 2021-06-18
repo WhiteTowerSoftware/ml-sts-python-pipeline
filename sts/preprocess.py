@@ -10,9 +10,7 @@ import logging
 import argparse
 import warnings
 import numpy as np
-from sklearn.preprocessing import MaxAbsScaler
 from sklearn.metrics.pairwise import * #support sparse matrix inputs
-from scipy.spatial.distance import * #do not support sparse matrix inputs
 
 warnings.filterwarnings(action='ignore')
 
@@ -165,26 +163,15 @@ if __name__ == "__main__":
     filename = f"train"
     np.savetxt(filepath + filename + '.csv', train, delimiter=",")
 
-    # NOT NEEDED, sagamaker will do this for us
-    # logger.info("Uploading data to bucket: %s, key: %s", bucket, filename + '.csv')
-    # s3_client.upload_file(filepath + filename + '.csv', bucket, filename + '.csv')
-    
     # validation
     filepath = f"{base_dir}/validation/"
     filename = f"validation"
     np.savetxt(filepath + filename + '.csv', validation, delimiter=",")
 
-    # logger.info("Uploading data to bucket: %s, key: %s", bucket, filename + '.csv')
-    # s3_client.upload_file(filepath + filename + '.csv', bucket, filename + '.csv')
-    
     # test
     filepath = f"{base_dir}/test/"
     filename = f"test"
     np.savetxt(filepath + filename + '.csv', test, delimiter=",")
 
-    # logger.info("Uploading data to bucket: %s, key: %s", bucket, filename + '.csv')
-    # s3_client.upload_file(filepath + filename + '.csv', bucket, filename + '.csv')
-
     logger.info("Data saved.")
-
     logger.info("End preprocessing.")

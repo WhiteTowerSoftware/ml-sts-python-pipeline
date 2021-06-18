@@ -14,7 +14,6 @@ import boto3
 import sagemaker
 import sagemaker.session
 
-from sagemaker.estimator import Estimator
 from sagemaker.inputs import TrainingInput
 from sagemaker.model_metrics import (
     MetricsSource,
@@ -89,22 +88,6 @@ def get_pipeline(
     Returns:
         an instance of a pipeline
     """
-
-    """
-        Instance types allowed:
-        
-        ml.r5.12xlarge, ml.m5.4xlarge, ml.p2.xlarge, ml.m4.16xlarge, ml.r5.24xlarge, 
-        ml.t3.xlarge, ml.r5.16xlarge, ml.m5.large, ml.p3.16xlarge, ml.p2.16xlarge, 
-        ml.c4.2xlarge, ml.c5.2xlarge, ml.c4.4xlarge, ml.c5.4xlarge, ml.c4.8xlarge, 
-        ml.c5.9xlarge, ml.c5.xlarge, ml.c4.xlarge, ml.t3.2xlarge, ml.t3.medium, 
-        ml.c5.18xlarge, ml.r5.2xlarge, ml.p3.2xlarge, ml.m5.xlarge, ml.m4.10xlarge, 
-        ml.r5.4xlarge, ml.m5.12xlarge, ml.m4.xlarge, ml.t3.large, ml.m5.24xlarge, 
-        ml.m4.2xlarge, ml.m5.2xlarge, ml.p2.8xlarge, ml.r5.8xlarge, ml.r5.xlarge, 
-        ml.r5.large, ml.p3.8xlarge, ml.m4.4xlarge
-
-        see
-        https://aws.amazon.com/blogs/machine-learning/right-sizing-resources-and-avoiding-unnecessary-costs-in-amazon-sagemaker/
-    """
     sagemaker_session = get_session(region, default_bucket)
     if role is None:
         role = sagemaker.session.get_execution_role(sagemaker_session)
@@ -124,12 +107,12 @@ def get_pipeline(
         name="ModelApprovalStatus", default_value="Approved"
     )
 
-    # preprocess 
+    # preprocess
 
     # preprocess input data
     input_data = ParameterString(
         name="InputDataUrl",
-        default_value=f"s3://sts-datwit-dataset/stsmsrpc.txt",
+        default_value="s3://sts-datwit-dataset/stsmsrpc.txt",
     )
 
     # processing step for feature engineering
@@ -146,12 +129,15 @@ def get_pipeline(
         name="PreprocessSTSData",
         processor=sklearn_processor,
         outputs=[
-            ProcessingOutput(output_name="train",
-                            source="/opt/ml/processing/train"),
-            ProcessingOutput(output_name="validation",
-                            source="/opt/ml/processing/validation"),
-            ProcessingOutput(output_name="test",
-                            source="/opt/ml/processing/test"),
+            ProcessingOutput(
+                output_name="train",
+                source="/opt/ml/processing/train"),
+            ProcessingOutput(
+                output_name="validation",
+                source="/opt/ml/processing/validation"),
+            ProcessingOutput(
+                output_name="test",
+                source="/opt/ml/processing/test"),
         ],
         code=os.path.join(BASE_DIR, "preprocess.py"),
         job_arguments=["--input-data", input_data],
