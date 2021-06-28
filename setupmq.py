@@ -1,6 +1,6 @@
 """Setup the schedule model quality monitor
 
-Assumes the shelude is called "mq-mon-sch-sts"
+Assumes the schedule is called "mq-mon-sch-sts"
 """
 from sagemaker.model_monitor import ModelQualityMonitor
 from sagemaker.model_monitor import EndpointInput
@@ -40,8 +40,7 @@ def show_schedule(name, client):
         print(pprint.pformat(d))
     except botocore.exceptions.ClientError as e:
         if e.response['Error']['Code'] == 'ResourceNotFound':
-            # ok, eso no existe
-            print("No hay información")
+            print("Resource not found or no info related.")
             return
         else:
             raise e
@@ -53,8 +52,7 @@ def json_default(o):
 
 
 def main(resources, train_data):
-
-    # configurarion
+    # Get configuration from ENV and set default values for missing items
     AWS_DEFAULT_REGION = os.getenv('AWS_DEFAULT_REGION', 'eu-west-1')
     AWS_PROFILE = os.getenv('AWS_PROFILE', 'default')
     AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID', None)
@@ -75,10 +73,10 @@ def main(resources, train_data):
         resources['endpoint']['name']
     )
     if 'monitor' not in resources:
-        raise ValueError("Monitoring not enabled")
+        raise ValueError("Monitoring not enabled.")
 
     if 's3_capture_upload_path' not in resources['monitor']:
-        raise ValueError("Monitoring not enabled")
+        raise ValueError("Monitoring not enabled.")
     
     baseline_prefix = prefix + "/baselining"
     baseline_data_prefix = baseline_prefix + "/data"
@@ -99,7 +97,7 @@ def main(resources, train_data):
     outputs['monitor'].update({'ground truth uri': ground_truth_upload_path})
 
     # Create a baselining job with training dataset
-    _l.info("Executing a baselining job with training dataset")
+    _l.info("Executing a baselining job with training dataset.")
     _l.info(f"baseline_data_uri: {train_data['baseline']['validate']}")
     my_monitor = ModelQualityMonitor(
         role=ROLE_ARN, 
@@ -115,14 +113,14 @@ def main(resources, train_data):
         wait=True
     )
     baseline_job = my_monitor.latest_baselining_job
-    _l.info("suggested baseline contrains")
+    _l.info("Suggested baseline contrains.")
     _l.info(
         pprint.pformat(
             baseline_job.suggested_constraints().body_dict[
                 "regression_constraints"]
             )
     )
-    _l.info("suggested baseline statistics")
+    _l.info("Suggested baseline statistics.")
     _l.info(
         pprint.pformat(
             baseline_job.baseline_statistics().body_dict[
@@ -159,9 +157,9 @@ def main(resources, train_data):
         time.sleep(3)
         mq_schedule_details = my_monitor.describe_schedule()
     _l.debug(
-        f"Model Quality Monitor - schedule details: {pprint.pformat(mq_schedule_details)}")
+        f"Model Quality Monitor - schedule details: {pprint.pformat(mq_schedule_details)}.")
     _l.info(
-        f"Model Quality Monitor - schedule status: {mq_schedule_details['MonitoringScheduleStatus']}")
+        f"Model Quality Monitor - schedule status: {mq_schedule_details['MonitoringScheduleStatus']}.")
 
     # save outputs to a file
     with open('deploymodel_out.json', 'w') as f:
