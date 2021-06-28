@@ -39,7 +39,7 @@ load_dotenv()
 
 
 def json_default(o):
-    """Dump  datatime to isoformat in json"""
+    """Dump datetime to isoformat in json"""
     if isinstance(o, (datetime.date, datetime.datetime)):
         return o.isoformat()
 
@@ -124,7 +124,7 @@ def main(datacapture=False):
     prefix = "{}/{}".format(BASE_JOB_PREFIX, endpoint_name)
     data_capture_prefix = "{}/datacapture".format(prefix)
     s3_capture_upload_path = "s3://{}/{}".format(bucket, data_capture_prefix)
-    # outputs is a dict to save to json
+    # outputs is a dict saved to json
     outputs = dict()
 
     if datacapture is True:
