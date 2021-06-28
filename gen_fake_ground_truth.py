@@ -1,11 +1,11 @@
 """Generate fake ground truth to test MQM
 
-requires --capture-prefix with the format YYYY/MM/DD/HH for example
+requires --capture-prefix argument with the format YYYY/MM/DD/HH for example
 
 python gen_fake_ground_truth.py --capture-prefix '2021/02/12/13'
 
-with corresponds to the data capture for day 12 of month 2 of year 2021 for
-the 13 hour,  assuming a hourly interval.
+corresponding to the data capture for February 12th, 2021,
+time interval between 13-14 hrs assuming a hourly interval.
 """
 from sts.utils import load_dataset, get_sm_session
 from sagemaker_containers.beta.framework import content_types, encoders
@@ -25,7 +25,7 @@ def ground_truth_with_id(
         inference_id, predicted, labels, inference_id_prefix):
     """Given a prediction generate ground truth label"""
     # comment the next line to use the actual label from the inference
-    # i am using random here to invalidate some of the values for
+    # I am using random here to invalidate some of the values for
     # the quality monitor
     data_label = random.choice(['1', '0'])
 
@@ -64,7 +64,7 @@ def main(deploy_data: dict, train_data: dict, capture_prefix: str):
     # read test data
     test_data = load_dataset(
         train_data['train']['test'], 'test.csv', sagemaker_session=sm_session)
-    print(f"Loadding {train_data['train']['test']}")
+    print(f"Loadding {train_data['train']['test']}.")
     Y_val = test_data.iloc[:, 0].to_numpy()
     print(f"Test dataset shape: {Y_val.shape}")
 
@@ -80,18 +80,18 @@ def main(deploy_data: dict, train_data: dict, capture_prefix: str):
     # just the files with the prefix
     filtered = list(filter(
         lambda file_name: capture_prefix in file_name, capture_files))
-    print(f"Detected {len(filtered)} capture files")
+    print(f"Detected {len(filtered)} capture files.")
 
     capture_records = []
     for c_file in filtered:
-        print(f"Processing: {c_file}")
+        print(f"Processing: {c_file}.")
         # read the capture data directly from S3
         content = S3Downloader.read_file(c_file, sagemaker_session=sm_session)
         records = [json.loads(l) for l in content.split("\n")[:-1]]
 
         capture_records.extend(records)
 
-    print(f"No. of records {len(capture_records)} captured")
+    print(f"No. of records captured: {len(capture_records)}.")
     captured_predictions = {}
 
     for obj in capture_records:
@@ -104,9 +104,9 @@ def main(deploy_data: dict, train_data: dict, capture_prefix: str):
         # Extract result given by the model
         Y_pred_value = encoders.decode(
             obj["captureData"]["endpointOutput"]["data"],
-            # i have fixed this value here becouse 
+            # I have fixed this value here because 
             # obj["captureData"]["endpointOutput"]["observedContentType"]
-            # some times include the encoding like: text/csv; utf-8
+            # some times includes the encoding like: text/csv; utf-8
             # and encoders.decode() will give error.
             content_types.CSV)
         captured_predictions[req_id] = Y_pred_value  # np.array
