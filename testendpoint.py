@@ -17,6 +17,7 @@ import argparse
 import json
 import progressbar
 import pathlib
+import time
 
 
 load_dotenv()
@@ -115,6 +116,7 @@ def main(
 
             # show progress
             bar.update(index)
+            time.sleep(0.3)  # don't be to fast
 
     with open('testendpoint_out.json', 'w') as f:
         json.dump(outputs, f)
