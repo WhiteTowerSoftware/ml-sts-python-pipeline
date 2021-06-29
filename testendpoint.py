@@ -1,9 +1,10 @@
 """Send traffic to the endpoint
 
 This uses the test.csv dataset"""
+from sts.preprocess import preprocess_sentences
 from sts.utils import get_sm_session
 from sagemaker.deserializers import CSVDeserializer
-from sagemaker.serializers import JSONSerializer
+from sagemaker.serializers import CSVSerializer
 from sagemaker.sklearn.model import SKLearnPredictor
 from sagemaker.s3 import S3Downloader
 from io import StringIO
@@ -13,7 +14,6 @@ import os
 import csv
 import argparse
 import json
-import pathlib
 import progressbar
 
 
@@ -31,7 +31,7 @@ def main(deploy_data, train_data):
     AWS_PROFILE = os.getenv('AWS_PROFILE', None)
     AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID', None)
     AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY', None)
-    b3_session, sm_client, sm_runtime, sm_session = get_sm_session(
+    _, _, _, sm_session = get_sm_session(
         region=AWS_DEFAULT_REGION,
         profile_name=AWS_PROFILE,
         aws_access_key_id=AWS_ACCESS_KEY_ID,
@@ -42,11 +42,12 @@ def main(deploy_data, train_data):
     predictor = SKLearnPredictor(
         deploy_data['endpoint']['name'],
         sagemaker_session=sm_session,
-        serializer=JSONSerializer(),
+        serializer=CSVSerializer(),
         deserializer=CSVDeserializer()
     )
 
     # read test data from online
+    print(f"Downloading {test_data_s3_uri}")
     test_data = csv.reader(
         StringIO(S3Downloader.read_file(test_data_s3_uri)),
         delimiter='\t'
@@ -66,10 +67,7 @@ def main(deploy_data, train_data):
     for row in test_data:
         try:
             test_data_rows.append({
-                "payload": {
-                    "s1": row[3],
-                    "s2": row[4]
-                },
+                "payload": preprocess_sentences(row[3], row[4]),
                 # will use the cat of the ids on stsmsrpc.txt
                 "inference_id": f"{row[1]}{row[2]}",
             })
@@ -92,7 +90,7 @@ def main(deploy_data, train_data):
             outputs['inferences'].append(
                 {
                     x_test_row.get('inference_id'): {
-                        'input': x_test_row.get('payload'),
+                        'input': x_test_row.get('payload').tolist(),
                         'result': result
                     }
                 }
