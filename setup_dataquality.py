@@ -126,27 +126,25 @@ def main(resources, train_data):
     # after the jobs run this will output the suggested contrains and 
     # statistics, both are saved to a s3 bucket, see deploymodel_out.json
     # for monitor.data-quality-baseline.results_uri
+    contrains = baseline_job.suggested_constraints()
+    stats = baseline_job.baseline_statistics()
     _l.debug("suggested baseline contrains")
     _l.debug(
-        pprint.pformat(
-            baseline_job.suggested_constraints().body_dict[
-                "features"]
-            )
-    )
+        pprint.pformat(contrains.body_dict["features"]))
     _l.debug("suggested baseline statistics")
     _l.debug(
-        pprint.pformat(
-            baseline_job.baseline_statistics().body_dict[
-                "features"]
-        )
-    )
+        pprint.pformat(contrains.body_dict["features"]))
     _l.debug("Data Quality monitoring config:")
     _l.debug(
-        pprint.pformat(
-            baseline_job.suggested_constraints().body_dict[
-                "monitoring_config"]
-        )
-    )
+        pprint.pformat(contrains.body_dict["monitoring_config"]))
+    # add monitoring config to outputs
+    outputs['monitor'].update({
+        'data-quality-baseline': {
+            'contrains': contrains.body_dict["features"],
+            'statistics': stats.body_dict['features'],
+            'config': contrains.body_dict['monitoring_config']
+        }
+    })
 
     print("")
     print("For details on Data Quality violations for various problem types, refer to")
