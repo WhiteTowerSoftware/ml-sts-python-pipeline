@@ -135,6 +135,10 @@ if __name__ == '__main__':
         default='trainmodel_out.json',
         help="JSON output from the train script"
     )
+    parser.add_argument(
+        '--alterdata',
+        action='store_true',
+        help="Alter the data sended to the endpoint")
 
     args, _ = parser.parse_known_args()
     print(f"Using deploy info {args.deploymodel_output}")
@@ -145,4 +149,4 @@ if __name__ == '__main__':
     with open(args.trainmodel_output) as f:
         train_data = json.load(f)
 
-    main(deploy_data, train_data)
+    main(deploy_data, train_data, alter_data=args.alterdata)
