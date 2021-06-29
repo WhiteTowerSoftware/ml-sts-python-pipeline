@@ -65,13 +65,6 @@ def main(
         S3Downloader.download(
             test_data_s3_uri, "./", sagemaker_session=sm_session)
     
-    # read test data from local_data_file
-    # print(f"Downloading {test_data_s3_uri}")
-    # test_data = csv.reader(
-    #     StringIO(S3Downloader.read_file(test_data_s3_uri)),
-    #     delimiter='\t'
-    # )
-
     # read test data locally,to avoid downloading from intenet
     test_data = csv.reader(
         StringIO(pathlib.Path(local_data_file).read_text()),
@@ -97,6 +90,7 @@ def main(
 
     # do a sample of the the rows in 'stsmsrpc.txt'
     x_test_rows = random.sample(test_data_rows, 50)
+    offenders = []
     with progressbar.ProgressBar(max_value=len(x_test_rows)) as bar:
         for index, x_test_row in enumerate(x_test_rows, start=1):
 
@@ -113,6 +107,8 @@ def main(
                     }
                 }
             )
+            if x_test_row.get('payload').shape != (1, 23):
+                offenders.append(x_test_row.get('payload'))
 
             # show progress
             bar.update(index)
@@ -120,6 +116,11 @@ def main(
 
     with open('testendpoint_out.json', 'w') as f:
         json.dump(outputs, f)
+    
+    print("Ofenders")
+    for o in offenders:
+        print(x_test_row.get('payload').shape)
+        print(x_test_row.get('payload'))
 
 
 if __name__ == '__main__':
