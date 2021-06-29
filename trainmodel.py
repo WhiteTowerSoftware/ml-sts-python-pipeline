@@ -2,7 +2,7 @@
 
 Will execute the ML pipeline defined in sts/pipeline.py
 
-This will use the fallowing cofigs from enviroment variables:
+This will use the following configs from enviroment variables:
 
 - AWS_DEFAULT_REGION
 - ROLE_ARN
@@ -31,7 +31,7 @@ load_dotenv()
 
 
 def extract_step_from_list(steps, step_to_extract) -> dict:
-    """extract the step definition from a list of pipeline steps"""
+    """Extract the steps definition from a list of pipeline steps"""
     for step in steps:
         if step.get('Name') in step_to_extract:
             return step
@@ -97,21 +97,21 @@ def main():
         # output debug information
         parsed = json.loads(pipe.definition())
         outputs['pipeline'] = parsed
-        _l.debug('ML Pipeline definition')
+        _l.debug('ML Pipeline definition.')
         _l.debug(json.dumps(parsed, indent=2, sort_keys=True))
 
         # Created/Updated SageMaker Pipeline
         upsert_response = pipe.upsert(role_arn=ROLE_ARN)
         _l.debug(
-            f"C/U SageMaker Pipeline: Response received: {upsert_response}")
+            f"C/U SageMaker Pipeline response received: {upsert_response}.")
 
-        _l.info("Starting the SageMaker pipeline")
+        _l.info("Starting the SageMaker pipeline.")
         execution = pipe.start()
-        _l.info("Waiting for the pipeline")
+        _l.info("Waiting for the pipeline to finish.")
         execution.wait()
 
-        _l.info("Pipeline finished: !!!")
-        _l.debug(f"{pprint.pformat(execution.list_steps())}")
+        _l.info("Pipeline finished!")
+        _l.debug(f"{pprint.pformat(execution.list_steps())}.")
 
         # Take the s3 uri of the baseline datatase baseline.csv
         mse_step = extract_step_from_list(
