@@ -76,9 +76,9 @@ def main(resources, train_data):
     dq_mon_schedule_output_s3_path = "s3://{}/{}".format(
         bucket, dq_schedule_output_prefix)
     outputs['monitor'].update({
-        'data-quality-baseline': {
-            'data_uri': baseline_data_uri,
-            'results_uri': baseline_results_uri,
+        'data-quality': {
+            'baseline_data': baseline_data_uri,
+            'baseline_results': baseline_results_uri,
             'output': dq_mon_schedule_output_s3_path
         }
     })
@@ -139,7 +139,7 @@ def main(resources, train_data):
         pprint.pformat(contrains.body_dict["monitoring_config"]))
     # add monitoring config to outputs
     outputs['monitor'].update({
-        'data-quality-baseline': {
+        'data-quality': {
             'contrains': contrains.body_dict["features"],
             'statistics': stats.body_dict['features'],
             'config': contrains.body_dict['monitoring_config']
@@ -154,8 +154,9 @@ def main(resources, train_data):
         f"{BASE_JOB_PREFIX}-dq-sch-{datetime.datetime.utcnow():%Y-%m-%d-%H%M}"
     )
     _l.info(f"Monitoring schedule name: {monitor_schedule_name}")
-    outputs['monitor'].update({
-        'dq_schedule_name': monitor_schedule_name})
+    outputs['monitor']['data-quality'].update({
+        'schedule_name': monitor_schedule_name
+    })
 
     # schedule a job to run hourly over the data capture in the model endpoint
     # to search for problems related to data quality, this will produce

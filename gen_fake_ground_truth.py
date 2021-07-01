@@ -121,7 +121,7 @@ def main(deploy_data: dict, train_data: dict, capture_prefix: str):
 
     data_to_upload = "\n".join(fake_records)
     target_s3_uri = "{}/{}/{}.jsonl".format(
-        deploy_data['monitor']['ground truth uri'],
+        deploy_data['monitor']['model-quality']['ground truth uri'],
         capture_prefix,
         uuid.uuid4().hex)
     print(f"Uploading ground truth to {target_s3_uri} ...", end="")

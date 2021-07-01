@@ -84,9 +84,9 @@ def main(resources, train_data):
     baseline_data_uri = "s3://{}/{}".format(bucket, baseline_data_prefix)
     baseline_results_uri = "s3://{}/{}".format(bucket, baseline_results_prefix)
     outputs['monitor'].update({
-        'baseline': {
-            'data_uri': baseline_data_uri,
-            'results_uri': baseline_results_uri
+        'model-quality': {
+            'baseline_data': baseline_data_uri,
+            'baseline_results': baseline_results_uri
         }
     })
     _l.info("Baseline data uri: {}".format(baseline_data_uri))
@@ -94,7 +94,9 @@ def main(resources, train_data):
 
     ground_truth_upload_path = f"s3://{bucket}/{prefix}/ground_truth_data"
     _l.info(f"Ground truth uri: {ground_truth_upload_path}")
-    outputs['monitor'].update({'ground truth uri': ground_truth_upload_path})
+    outputs['monitor']['model-quality'].update({
+        'ground truth uri': ground_truth_upload_path
+    })
 
     # Create a baselining job with training dataset
     _l.info("Executing a baselining job with training dataset.")
