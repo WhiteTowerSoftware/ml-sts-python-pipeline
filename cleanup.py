@@ -54,17 +54,21 @@ def main(resources):
     )
 
     # remove resources created by deploymodel.py and setup_mq.py
-    if 'monitor' in resources and 'schedule_name' in resources['monitor']:
-        print("Removing Model Quality Schedule")
-        delete_schedule(
-            resources['monitor']['schedule_name'],
-            sm_client)
+    if 'monitor' in resources:
+        res = resources['monitor']
+        if 'model-quality' in res:
+            if 'schedule_name' in res['model-quality']:
+                print("Removing Model Quality Schedule")
+                delete_schedule(
+                    res['model-quality']['schedule_name'],
+                    sm_client)
 
-    if 'monitor' in resources and 'dq_schedule_name' in resources['monitor']:
-        print("Removing Data Quality Schedule")
-        delete_schedule(
-            resources['monitor']['dq_schedule_name'],
-            sm_client)
+        if  'data-quality' in res:
+            if 'schedule_name' in res['data-quality']:
+                print("Removing Data Quality Schedule")
+                delete_schedule(
+                    res['data-quality']['dq_schedule_name'],
+                    sm_client)
 
     if 'endpoint' in resources:
         predictor = SKLearnPredictor(
