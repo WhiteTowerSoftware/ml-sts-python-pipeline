@@ -2,7 +2,6 @@
 
 import os
 import csv
-import pickle
 import string
 import pathlib
 import boto3
@@ -83,7 +82,6 @@ def preprocess_sentences(s1, s2) -> np.array:
         vector.append(dist[0])
 
     distances_matrix.append(vector)
-
     '''
     Scaling
     '''

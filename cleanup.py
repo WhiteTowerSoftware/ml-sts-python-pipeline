@@ -67,7 +67,7 @@ def main(resources):
             if 'schedule_name' in res['data-quality']:
                 print("Removing Data Quality Schedule")
                 delete_schedule(
-                    res['data-quality']['dq_schedule_name'],
+                    res['data-quality']['schedule_name'],
                     sm_client)
 
     if 'endpoint' in resources:
