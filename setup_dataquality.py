@@ -141,7 +141,6 @@ def main(resources, train_data):
     outputs['monitor'].update({
         'data-quality': {
             'contrains': contrains.body_dict["features"],
-            'statistics': stats.body_dict['features'],
             'config': contrains.body_dict['monitoring_config']
         }
     })
