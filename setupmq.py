@@ -115,6 +115,10 @@ def main(resources, train_data):
         wait=True
     )
     baseline_job = my_monitor.latest_baselining_job
+    outputs['monitor']['model-quality'].update({
+        'constraints': baseline_job.suggested_constraints().body_dict[
+                "regression_constraints"]
+    })
     _l.info("Suggested baseline contrains.")
     _l.info(
         pprint.pformat(
@@ -134,7 +138,7 @@ def main(resources, train_data):
         f"{BASE_JOB_PREFIX}-mq-sch-{datetime.datetime.utcnow():%Y-%m-%d-%H%M}"
     )
     _l.info(f"Monitoring schedule name: {monitor_schedule_name}")
-    outputs['monitor'].update({
+    outputs['monitor']['model-quality'].update({
         'schedule_name': monitor_schedule_name})
     endpointInput = EndpointInput(
         resources['endpoint']['name'], 
