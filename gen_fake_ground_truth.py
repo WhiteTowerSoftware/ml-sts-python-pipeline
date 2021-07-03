@@ -21,32 +21,25 @@ import random
 load_dotenv()
 
 
-def ground_truth_with_id(
-        inference_id, predicted, labels, inference_id_prefix):
+def ground_truth_with_id(inference_id, predicted):
     """Given a prediction generate ground truth label"""
-    # comment the next line to use the actual label from the inference
     # I am using random here to invalidate some of the values for
     # the quality monitor
     data_label = random.choice(['1', '0'])
-
-    # check if original label and predicted are the same and label,
-    # uncomment to use test dataset
-    # data_label = '1.0' if label == labels[inference_id-1] else '0.0'
 
     return {
         "groundTruthData": {
             "data": data_label,
             "encoding": "CSV",  # only supports CSV
-        }, 
+        },
         "eventMetadata": {
-            "eventId": f"{inference_id_prefix}{str(inference_id)}",
+            "eventId": inference_id,
         },
         "eventVersion": "0",
     }
 
 
-def main(deploy_data: dict, train_data: dict, capture_prefix: str):
-    inference_id_prefix = 'sts_'  # the same used in testendpoint.py
+def main(deploy_data: dict, capture_prefix: str):
 
     # Load config from environment and set required defaults
     # AWS especific
@@ -61,13 +54,6 @@ def main(deploy_data: dict, train_data: dict, capture_prefix: str):
         aws_secret_access_key=AWS_SECRET_ACCESS_KEY
     )
 
-    # read test data
-    test_data = load_dataset(
-        train_data['train']['test'], 'test.csv', sagemaker_session=sm_session)
-    print(f"Loadding {train_data['train']['test']}.")
-    Y_val = test_data.iloc[:, 0].to_numpy()
-    print(f"Test dataset shape: {Y_val.shape}")
-
     # list capture files, this is just as an example. Not used right
     # now but could be.
     capture_files = sorted(
@@ -77,7 +63,7 @@ def main(deploy_data: dict, train_data: dict, capture_prefix: str):
                 deploy_data['endpoint']['name']),
             sagemaker_session=sm_session)
     )
-    # just the files with the prefix
+    # just the files with the prefix "YYYY/MM/DD/HH"
     filtered = list(filter(
         lambda file_name: capture_prefix in file_name, capture_files))
     print(f"Detected {len(filtered)} capture files.")
@@ -92,32 +78,21 @@ def main(deploy_data: dict, train_data: dict, capture_prefix: str):
         capture_records.extend(records)
 
     print(f"No. of records captured: {len(capture_records)}.")
-    captured_predictions = {}
-
+    fake_records = []
+    print("Generating fake ground truth labels")
     for obj in capture_records:
         # Extract inference ID
         inference_id = obj["eventMetadata"]["inferenceId"]
-        # current version of script start in 1 when id=0
-        # remove the prefix and get the id
-        req_id = int(inference_id[len(inference_id_prefix):])
-        
-        # Extract result given by the model
-        Y_pred_value = encoders.decode(
+        prediction = encoders.decode(
             obj["captureData"]["endpointOutput"]["data"],
-            # I have fixed this value here because 
+            # I have fixed this value here because
             # obj["captureData"]["endpointOutput"]["observedContentType"]
             # some times includes the encoding like: text/csv; utf-8
             # and encoders.decode() will give error.
             content_types.CSV)
-        captured_predictions[req_id] = Y_pred_value  # np.array
-
-
-    # save and upload the ground truth labels
-    print("Generating labels")
-    fake_records = []
-    for i,label in captured_predictions.items():
-        val = ground_truth_with_id(i,label, Y_val, inference_id_prefix)
-        fake_records.append(json.dumps(val))
+        groud_truth_label = ground_truth_with_id(
+            inference_id, prediction)
+        fake_records.append(json.dumps(groud_truth_label))
 
     data_to_upload = "\n".join(fake_records)
     target_s3_uri = "{}/{}/{}.jsonl".format(
@@ -133,27 +108,18 @@ def main(deploy_data: dict, train_data: dict, capture_prefix: str):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--deploymodel-output", type=str, required=False, 
+        "--deploymodel-output", type=str, required=False,
         default='deploymodel_out.json',
         help="JSON output from the deploy script"
     )
     parser.add_argument(
-        "--trainmodel-output", type=str, required=False, 
-        default='trainmodel_out.json',
-        help="JSON output from the train script"
-    )
-    parser.add_argument(
-        "--capture-prefix", type=str, required=True, 
+        "--capture-prefix", type=str, required=True,
         help="Capture data prefix in the format YYYY/MM/DD/HH"
     )
 
     args, _ = parser.parse_known_args()
     print(f"Using deploy info {args.deploymodel_output}")
-    print(f"Using training info {args.trainmodel_output}")
     with open(args.deploymodel_output) as f:
         deploy_data = json.load(f)
 
-    with open(args.trainmodel_output) as f:
-        train_data = json.load(f)
-
-    main(deploy_data, train_data, args.capture_prefix)
+    main(deploy_data, args.capture_prefix)
