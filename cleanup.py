@@ -1,10 +1,10 @@
-"""Cleanup the workspace
+"""Workspace Cleanup
 
 - Remove the endpoint
 - Remove the model
-- if exits remove the schedule model monitor
+- if exits remove the scheduled model monitor
 
-Assumes the shelude is called "mq-mon-sch-sts"
+Assumes the model monitor is called "mq-mon-sch-sts"
 """
 from sagemaker.sklearn.model import SKLearnPredictor
 from dotenv import load_dotenv
@@ -35,7 +35,6 @@ def delete_schedule(name, client):
             )
     except botocore.exceptions.ClientError as e:
         if e.response['Error']['Code'] == 'ResourceNotFound':
-            # ok, eso no existe
             return
         else:
             raise e
@@ -54,7 +53,7 @@ def main(resources):
         aws_secret_access_key=AWS_SECRET_ACCESS_KEY
     )
 
-    # remove resourses created by deploymodel.py and setup_mq.py
+    # remove resources created by deploymodel.py and setup_mq.py
     if 'monitor' in resources and 'schedule_name' in resources['monitor']:
         print("Removing Model Quality Schedule")
         delete_schedule(
