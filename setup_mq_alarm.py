@@ -92,6 +92,38 @@ def main(resources):
         print(".", end="", flush=True)
     print(f"Metrics: {pprint.pformat(metric_list)}")
 
+    ## Example of alarm trough CloudWatch
+    alarm_name = f"{monitor_schedule_name}_MODEL_QUALITY_R2_SCORE"
+    resources['monitor']['model-quality']['alarm-name'] = alarm_name
+    alarm_desc = (
+        "Trigger an CloudWatch alarm when the r2 score drifts away from"
+        " the baseline constraints"
+    )
+    mdoel_quality_r2_drift_threshold = (
+        ##Setting this threshold low to see the alarm quickly.
+        -0.4749968163410846
+    )
+    metric_name = "r2"
+    namespace = "aws/sagemaker/Endpoints/model-metrics"
+
+    cw_client.put_metric_alarm(
+        AlarmName=alarm_name,
+        AlarmDescription=alarm_desc,
+        ActionsEnabled=True,
+        MetricName=metric_name,
+        Namespace=namespace,
+        Statistic="Average",
+        Dimensions=cw_dimensions,
+        Period=600,
+        EvaluationPeriods=1,
+        DatapointsToAlarm=1,
+        Threshold=mdoel_quality_r2_drift_threshold,
+        ComparisonOperator="LessThanOrEqualToThreshold",
+        TreatMissingData="breaching",
+    )
+
+    print(f"Cloudwatch alarm {alarm_name} Installed !!!")
+
     # save outputs to a file
     with open('deploymodel_out.json', 'w') as f:
         json.dump(outputs, f, default=json_default)

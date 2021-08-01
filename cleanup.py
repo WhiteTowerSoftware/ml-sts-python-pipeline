@@ -62,6 +62,14 @@ def main(resources):
                 delete_schedule(
                     res['model-quality']['schedule_name'],
                     sm_client)
+            if 'alarm-name' in res['model-quality']:
+                cw_client = b3_session.client('cloudwatch')
+                print("Removing Model Quality CloudWatch Alarms")
+                cw_client.delete_alarms(
+                    AlarmNames=[
+                        res['model-quality']['alarm-name'],
+                    ]
+                )
 
         if  'data-quality' in res:
             if 'schedule_name' in res['data-quality']:
